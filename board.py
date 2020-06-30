@@ -1,4 +1,7 @@
 import matplotlib.pyplot as plt
+import os
+from time import gmtime, strftime
+
 
 '''
     Takes in a board of any square dimension, and gets all the neighbours of a cell.
@@ -47,13 +50,21 @@ def play_with_neighbours(player, neighbours, payoff_matrix):
 '''
     For simplicity, a matplotlib is created to represent the cells' state.
 '''
-def create_plot(board, board_dim):
+def create_plot(board, old_board, board_dim, file_name, t):
     image = [[[-1,-1,-1] for _ in range(board_dim)] for _ in range(board_dim)]
     for i,row in enumerate(board):
         for j,col in enumerate(row):
-            image[i][j] = [255,0,0] if col == 'd' else [0,0,255]
+            last_cell = old_board[i][j]
+            if last_cell is 'd' and col is 'd':
+                image[i][j] = [255,0,0]
+            elif last_cell is 'd' and col is 'c':
+                image[i][j] = [0,255,0]
+            elif last_cell is 'c' and col is 'c':
+                image[i][j] = [0,0,255]
+            elif last_cell is 'c' and col is 'd':
+                image[i][j] = [255,255,0]
     plt.imshow(image)
-    plt.show()
+    plt.savefig("%s/%d" % (file_name, t+1))
 
 '''
     Create a new board, but along with the cell's strategy, it's payoff value is also recorded.
@@ -103,24 +114,27 @@ def update_board(board, board_dim):
 '''
     Simulate the spatial game according to Nowak's example.
 '''
-def simulate(b, epsilon, board_dim=100, epochs=1, verbose=False):
-    board = [['c' for i in range(board_dim)] for j in range(board_dim)]
-    board[(board_dim-1)//2][(board_dim-1)//2] = 'd'
+def simulate(b, epsilon, board, board_dim=100, time=1, verbose=False):
     if verbose:
         print('\n'.join([','.join([str(item) for item in row]) for row in board]))
     payoff_matrix = [[1, 0], [b, epsilon]]
-    for epoch in range(epochs):
-        print('-------------------------START OF EPOCH %d-------------------------' % (epoch+1))
+    file_name = strftime("%Y_%m_%d_%H_%M_%S", gmtime())
+    if not os.path.isdir(file_name):
+        os.makedirs(file_name)
+    for t in range(time):
+        old_board = [[item for item in row] for row in board]
+        print('-------------------------START OF t %d-------------------------' % (t+1))
         payoff_board = get_payoff_values(board, payoff_matrix, board_dim)
         if verbose:
             print('\n'.join([','.join([str(item) for item in row]) for row in payoff_board]))
         board = update_board(payoff_board, board_dim)
         if verbose:
-            print('--------------------------------- EPOCH %d ---------------------------------' % (epoch+1))
+            print('--------------------------------- t %d ---------------------------------' % (t+1))
             print('\n'.join([','.join([str(item) for item in row]) for row in board]))
-            print('--------------------------------- END OF EPOCH %d ---------------------------------' % (epoch+1))
-        print('-------------------------END OF EPOCH %d-------------------------' % (epoch+1))
-    create_plot(board, board_dim)
+            print('--------------------------------- END OF t %d ---------------------------------' % (t+1))
+        print('-------------------------END OF t %d-------------------------' % (t+1))
+        create_plot(board, old_board, board_dim, file_name, t)
+        print('-------------------------SAVED IN %s/%d-------------------------' % (file_name,t+1))
 
     if verbose:
         print("----------------------IDX----------------------")
