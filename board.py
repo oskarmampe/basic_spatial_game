@@ -63,8 +63,11 @@ def create_plot(board, old_board, board_dim, file_name, t):
                 image[i][j] = [0,0,255]
             elif last_cell is 'c' and col is 'd':
                 image[i][j] = [255,255,0]
+    plt.figure(num=None, figsize=(20, 18), dpi=100, facecolor='w', edgecolor='k')
+    plt.axis("off")
     plt.imshow(image)
     plt.savefig("%s/%d" % (file_name, t+1))
+    plt.close()
 
 '''
     Create a new board, but along with the cell's strategy, it's payoff value is also recorded.
