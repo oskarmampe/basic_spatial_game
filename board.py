@@ -139,6 +139,10 @@ def simulate(b, epsilon, board, board_dim=100, time=1, verbose=False):
         create_plot(board, old_board, board_dim, file_name, t)
         print('-------------------------SAVED IN %s/%d-------------------------' % (file_name,t+1))
 
+    if time is 0:
+        old_board = [[item for item in row] for row in board]
+        create_plot(board, old_board, board_dim, file_name, time)
+
     if verbose:
         print("----------------------IDX----------------------")
         print('\n'.join([','.join([str(item) for item in row]) for row in board]))
